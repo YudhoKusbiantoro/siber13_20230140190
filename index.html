@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Unggah File</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 550px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 26px;
+    }
+
+    input[type="file"] {
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      padding: 6px;
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .link-daftar {
+      display: inline-block;
+      margin-top: 25px;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .link-daftar:hover {
+      color: #0056b3;
+    }
+
+    .preview-container {
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+
+    .preview-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
+    .preview-name {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .preview-content {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 6px;
+      background: #eee;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+
+    .preview-pdf iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
+
+    .remove-btn {
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 6px;
+      align-self: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📤 Unggah File</h1>
+    <form id="uploadForm" action="upload.php" method="POST" enctype="multipart/form-data">
+      <input type="file" id="fileInput" name="files[]" multiple accept="image/*,application/pdf">
+      <div id="preview" class="preview-container"></div>
+      <button type="submit">Unggah</button>
+    </form>
+    <a class="link-daftar" href="files.php">📁 Lihat Daftar File yang Telah Diunggah</a>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('preview');
+    const form = document.getElementById('uploadForm');
+
+    let selectedFiles = [];
+
+    fileInput.addEventListener('change', function () {
+      selectedFiles = Array.from(fileInput.files);
+      showPreviews();
+    });
+
+    function showPreviews() {
+      previewContainer.innerHTML = '';
+      selectedFiles.forEach((file, index) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+
+        const nameSpan = document.createElement('div');
+        nameSpan.className = 'preview-name';
+        nameSpan.textContent = file.name;
+
+        const previewContent = document.createElement('div');
+        previewContent.className = 'preview-content';
+
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.className = 'preview-img';
+          img.src = URL.createObjectURL(file);
+          previewContent.appendChild(img);
+        } else if (file.type === 'application/pdf') {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'preview-pdf';
+          const iframe = document.createElement('iframe');
+          iframe.src = URL.createObjectURL(file);
+          wrapper.appendChild(iframe);
+          previewContent.appendChild(wrapper);
+        } else {
+          previewContent.textContent = 'Pratinjau tidak tersedia untuk jenis file ini';
+        }
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Hapus';
+        removeBtn.onclick = () => {
+          selectedFiles.splice(index, 1);
+          updateInputFiles();
+          showPreviews();
+        };
+
+        previewItem.appendChild(nameSpan);
+        previewItem.appendChild(previewContent);
+        previewItem.appendChild(removeBtn);
+        previewContainer.appendChild(previewItem);
+      });
+    }
+
+    function updateInputFiles() {
+      const dataTransfer = new DataTransfer();
+      selectedFiles.forEach(file => dataTransfer.items.add(file));
+      fileInput.files = dataTransfer.files;
+    }
+  </script>
+</body>
+</html>
